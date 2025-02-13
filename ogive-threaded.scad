@@ -48,11 +48,14 @@ eyeletd=8;
 recesswall=1;
 
 //ogivenosecone();
-//ogivenoseconevented();
+ogivenoseconevented();
 //base();
-baseslotted();
+//baseslotted();
 //sled();
 //fitcheck();
+
+
+$fn = $preview ? 0 : 256;
 
 // Fit check: quick print to test fit in body tube
 module fitcheck(){
