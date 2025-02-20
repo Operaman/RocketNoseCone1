@@ -30,7 +30,7 @@ use <Thread_Library.scad>
 bodyid=40.25;
 bodyod=41.5;
 noseconeheight=120;
-wallt=1.25;
+wallt=2;
 bottomt=2;
 pitch=5;
 holed=3;
@@ -46,14 +46,28 @@ pcbw=20;
 tagl=15;
 eyeletd=8;
 recesswall=1;
+cameraextensionheight=125;
+cameraw=24.5;
+camerad=24.5;
+camerah=24;
+cameraoffset=0.5;
+cameratilt=130;
+lensd=10;
+scalloph=40;
+scallopd=50;
+lockbarh=5;
+lockbart=3;
+lockbaroffset=6;
 
 //ogivenosecone();
-ogivenoseconevented();
+//ogivenoseconevented();
+//cameraextension();
 //base();
 //baseslotted();
 //sled();
 //fitcheck();
-
+//cameraneg();
+lockbar();
 
 $fn = $preview ? 0 : 256;
 
@@ -115,6 +129,26 @@ module ogivenoseconevented(diameter=bodyod,height=noseconeheight,wallt=wallt,
     }
 }
 
+module cameraextension(diameter=bodyod,height=cameraextensionheight,wallt=wallt,
+    ventdiameter=ventd,ventheight=venth,
+    camerazoffset=camerazoffset,
+    threadh=bodyid/2,pitch=pitch,wallt=wallt,holed=holed,threadd=threadd,bottomt=bottomt){
+    difference(){
+		union(){
+            cylinder(r=diameter/2,h=height);
+			translate([0,0,cameraextensionheight-0.01]) trapezoidThread(length=threadh,pitchRadius=threadd/2-pitch/4,pitch=pitch);
+		}
+        translate([0,0,diameter/2]) cylinder(r=(diameter/2)-wallt,h=ventheight+ventd-diameter/2);
+		baseneg();
+        translate([0,0,ventheight]){
+            rotate([90,0,0]){
+                cylinder(h=bodyod+1,r=ventdiameter/2,center=true);
+            }
+        }     
+        rotate([0,0,90]) translate([0,cameraoffset,height-camerah*0.75]) cameraneg();
+    }
+}
+
 module sled(width=pcbw,height=pcbh+bodyid+tagl,thickness=sledt,ridge=sledridge,eyeletdiameter=eyeletd,recesswidth=pcbw-recesswall*2,recessheight=pcbh-recesswall*2,recessdepth=sledt-1,recessposition=bodyid+tagl+recesswall){
     difference(){
         union(){
@@ -168,8 +202,28 @@ module baseslotted(bodyid=bodyid,baseh=bodyid/2,threadh=bodyid/2,pitch=pitch,wal
 	}
 }
 
-
-
-module baseneg(bodyid=bodyid,baseh=bodyid/2,threadh=bodyid/2,pitch=pitch,wallt=wallt,holed=holed,threadd=threadd){
+module baseneg(bodyid=bodyid,baseh=bodyid/3,threadh=bodyid/2,pitch=pitch,wallt=wallt,holed=holed,threadd=threadd){
 	trapezoidThreadNegativeSpace(length=threadh,pitchRadius=threadd/2-pitch/4,pitch=pitch,countersunk=0.05);
+}
+
+module cameraneg(bodyod=bodyod,cameraw=cameraw,camerad=camerad,camerah=camerah,lensd=lensd,scallopd=scallopd,cameratilt=cameratilt,lockbarh=lockbarh,lockbart=lockbart,lockbaroffset=lockbaroffset){
+    union(){
+        rotate([cameratilt,0,0]) union(){
+            cube([cameraw,camerad,camerah], center=true);
+            translate([0,-camerad/2-lockbart/2,-camerah/2+lockbarh/2+  lockbaroffset]) cube([bodyod,lockbart+0.25,lockbarh+0.25],center = true);
+            translate([0,-bodyod,0]) cube([cameraw,camerad*3,camerah], center=true);
+            translate([0,0,camerah/2]) cylinder(scalloph,lensd/2,scallopd/2);
+        }
+        rotate([cameratilt-90,0,0]) translate([0,bodyod/2,-camerah/2]) cube([cameraw,bodyod,10],center=true);
+    }
+}
+
+module lockbar(bodyod=bodyod,camerad=camerad,cameratilt=cameratilt,lockbarh=lockbarh,lockbart=lockbart,lockbaroffset=lockbaroffset){
+    translate([0,-(-camerad/2-lockbart/2),-(-camerah/2+lockbarh/2+lockbaroffset)]) difference(){
+        translate([0,-camerad/2-lockbart/2,-camerah/2+lockbarh/2+lockbaroffset]) cube([bodyod,lockbart,lockbarh],center=true);
+        rotate([cameratilt-90,0,0]) difference() {
+            cylinder(h=bodyod*2,r=bodyod,center=true);
+          cylinder(h=bodyod*2,r=bodyod/2,center=true);
+        }
+    }
 }
